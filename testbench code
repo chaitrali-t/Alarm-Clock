@@ -1,0 +1,90 @@
+module tb;
+  reg reset;
+  reg clk;
+  reg [1:0] h_in1;
+  reg [3:0] h_in0;
+  reg [3:0] m_in1;
+  reg [3:0] m_in0;
+  reg load_time;
+  reg load_alarm;
+  reg stop_alarm;
+  reg alarm_on;
+  
+  wire Alarm;
+  wire [1:0] h_out1;
+  wire [3:0] h_out0;
+  wire [3:0] m_out1;
+  wire [3:0] m_out0;
+  wire [3:0] s_out1;
+  wire [3:0] s_out0;
+
+  aClock uut (
+    .reset(reset), 
+    .clk(clk), 
+    .h_in0(h_in0),
+    .h_in1(h_in1), 
+    .m_in0(m_in0),
+    .m_in1(m_in1),  
+    .load_time(load_time), 
+    .load_alarm(load_alarm), 
+    .stop_alarm(stop_alarm), 
+    .alarm_on(alarm_on), 
+    .Alarm(Alarm), 
+    .h_out1(h_out1), 
+    .h_out0(h_out0), 
+    .m_out1(m_out1), 
+    .m_out0(m_out0), 
+    .s_out1(s_out1), 
+    .s_out0(s_out0)	
+  );
+
+  initial begin
+    clk = 0;
+    forever #2 clk = ~clk;  
+  end
+
+  initial begin
+    $dumpfile("dump.vcd");
+    $dumpvars(0, tb);
+  end
+
+  initial begin
+    
+    // loading current time
+    reset = 1;
+    h_in1 = 1;
+    h_in0 = 0;
+    m_in1 = 3;
+    m_in0 = 9;
+    load_time = 0;
+    load_alarm = 0;
+    stop_alarm = 0;
+    alarm_on = 0;
+    #10;
+
+    reset = 0;
+    load_time = 1;
+    #10 load_time = 0;
+
+    $display("Loaded Time: %d%d:%d%d", h_in1, h_in0, m_in1, m_in0);
+	
+    // loading alarm clock
+    load_alarm = 1;
+    h_in1 = 1;
+    h_in0 = 0;
+    m_in1 = 4;
+    m_in0 = 0;
+    alarm_on = 1;
+    #10;
+
+    $display("Alarm Set: %d%d:%d%d", h_in1, h_in0, m_in1, m_in0);
+
+    // to stop the alarm
+    load_alarm = 0;
+    #500 stop_alarm = 1;
+    #100 stop_alarm = 0;
+    $finish;
+    
+  end
+
+endmodule
